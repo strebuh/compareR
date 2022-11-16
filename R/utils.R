@@ -50,12 +50,13 @@ get_avg <- function(data, grp_col, val_col){
 #'
 #' @return data.table
 #' @export
-#'
+#'agregat
 #' @examples
 get_agr <- function(data, grp_col, val_col, agr_type="mean"){
   if(arg_type %in% c("mean", "median", "sd")){
     stop("Unsuported agregation. Only mean, median and sd available.")
   }
+  data.table::setDT(data)
   agreg <- get(agr_type)
   data <- data.table::copy(data) %>% .[, agregat := agr_type] %>% # add mean to last grouping variable
     .[, lapply(.SD, function(x) round(agreg(x[!is.nan(x)], na.rm = T), 2)), by=c(grp_col, "agregat"), .SDcols=val_col] # compute means per group for each variable
