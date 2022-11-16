@@ -4,6 +4,8 @@
 # compareR
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/strebuh/compareR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/strebuh/compareR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of compareR is to …
