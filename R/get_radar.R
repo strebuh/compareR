@@ -19,20 +19,19 @@ get_radar <- function(data, filters, id_var, grouper, mapped_vars, aggregation){
   data.table::setDT(data)
 
   # Prepare data
-  grouped_data <- data  %>% split(., .[, ..grouper])
+  grouped_data <- data  %>% data.table::split(., .[, ..grouper])
   grouped_data_a <- data %>%
     get_agr(grp_col=grouper, val_col=mapped_vars, agr_type=aggregation) %>%
-    split(., .[, ..grouper])
-  filtered_grouped_data <- map(grouped_data, function(df) filter(df, across(all_of(names(filters)), ~ .x %in% filters[[cur_column()]])))
+    data.table::split(., .[, ..grouper])
+  filtered_grouped_data <- purrr::map(grouped_data, function(df) dplyr::filter(df, dplyr::across(dplyr::all_of(names(filters)), ~ .x %in% filters[[cur_column()]])))
 
   # Prepare scaled data
   data_s <- scale_b(data, mapped_vars)
-  grouped_data_s <- data_s %>% split(., .[, ..grouper])
+  grouped_data_s <- data_s %>% data.table::split(., .[, ..grouper])
   grouped_data_s_a <- data_s %>%
     get_agr(grp_col=grouper, val_col=mapped_vars, agr_type=aggregation) %>%
-    split(., .[, ..grouper])
-  filtered_grouped_data_s <- map(grouped_data_s, function(df) filter(df, across(all_of(names(filters)), ~ .x %in% filters[[cur_column()]])))
-
+    data.table::split(., .[, ..grouper])
+  filtered_grouped_data_s <- purrr::map(grouped_data_s, function(df) dplyr::filter(df, dplyr::across(dplyr::all_of(names(filters)), ~ .x %in% filters[[cur_column()]])))
 
   fig <- plotly::plot_ly(
     type = 'scatterpolar',
