@@ -13,24 +13,24 @@
 #' @return plotly object
 #' @export
 #'
-#' @examples
+# @examples
 get_radar <- function(data, filters, id_var, grouper, mapped_vars, aggregation){
 
   data.table::setDT(data)
 
   # Prepare data
-  grouped_data <- data  %>% data.table::split(., .[, ..grouper])
+  grouped_data <- data  %>% split(., .[, grouper, with = FALSE])
   grouped_data_a <- data %>%
     get_agr(grp_col=grouper, val_col=mapped_vars, agr_type=aggregation) %>%
-    data.table::split(., .[, ..grouper])
+    split(., .[, grouper, with = FALSE])
   filtered_grouped_data <- purrr::map(grouped_data, function(df) dplyr::filter(df, dplyr::across(dplyr::all_of(names(filters)), ~ .x %in% filters[[cur_column()]])))
 
   # Prepare scaled data
-  data_s <- scale_b(data, mapped_vars)
-  grouped_data_s <- data_s %>% data.table::split(., .[, ..grouper])
+  data_s <- scale_data(data, mapped_vars)
+  grouped_data_s <- data_s %>% split(., .[, grouper, with = FALSE])
   grouped_data_s_a <- data_s %>%
     get_agr(grp_col=grouper, val_col=mapped_vars, agr_type=aggregation) %>%
-    data.table::split(., .[, ..grouper])
+    split(., .[, grouper, with = FALSE])
   filtered_grouped_data_s <- purrr::map(grouped_data_s, function(df) dplyr::filter(df, dplyr::across(dplyr::all_of(names(filters)), ~ .x %in% filters[[cur_column()]])))
 
   fig <- plotly::plot_ly(
@@ -41,13 +41,13 @@ get_radar <- function(data, filters, id_var, grouper, mapped_vars, aggregation){
   # Agregated level for each group
   for(g in seq_along(grouped_data)){
     grp_agr <- grouped_data_s_a[[g]]
-    grp <- grouped_data_a[[g]][, ..mapped_vars]
+    grp <- grouped_data_a[[g]][, mapped_vars, with = FALSE]
 
     fig <- fig %>%
       plotly::add_trace(
-        r = unlist(grp_agr[, ..mapped_vars]),
+        r = unlist(grp_agr[, mapped_vars, with = FALSE]),
         theta = mapped_vars,
-        name = paste(grp_agr[, ..grouper], grp_agr$agregat, sep = " - "),
+        name = paste(grp_agr[, grouper, with = FALSE], grp_agr$agregat, sep = " - "),
         text = unname(unlist(grp)),
         hoverinfo = 'text'
       )
@@ -59,12 +59,12 @@ get_radar <- function(data, filters, id_var, grouper, mapped_vars, aggregation){
     grp <- grouped_data[[g]]
     for(row in seq_len(nrow(grp_agr)) ){
       record_s <- grp_agr[row,]
-      record <- grp[row,][, ..mapped_vars]
+      record <- grp[row,][, mapped_vars, with = FALSE]
       fig <- fig %>%
         plotly::add_trace(
-          r = unlist(record_s[, ..mapped_vars]),
+          r = unlist(record_s[, mapped_vars, with = FALSE]),
           theta = mapped_vars,
-          name = paste(record_s[, ..id_var], record_s[, ..grouper], sep=", "),
+          name = paste(record_s[, id_var, with = FALSE], record_s[, grouper, with = FALSE], sep=", "),
           text = unname(unlist(record)),
           hoverinfo = 'text'
         )

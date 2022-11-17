@@ -11,7 +11,7 @@
 #' @return data.table
 #' @export
 #'
-#' @examples
+# @examples
 scale_data <- function(data, num_col, min=0, max=10){
   data_s <- data.table::copy(data) %>% .[, c(num_col):=lapply(.SD, function(x) round(scales::rescale(x, to=c(min, max)), 2)), .SDcols=num_col]
   return(data_s)
@@ -28,13 +28,14 @@ scale_data <- function(data, num_col, min=0, max=10){
 #' @return data.table
 #' @export
 #'
-#' @examples
+# @examples
 get_avg <- function(data, grp_col, val_col){
+  group <- NULL # no visible binding for global variable 'group'
   data.table::setDT(data)
   new_gr <- grp_col[length(grp_col)]
   data <- data.table::copy(data) %>% .[, c(new_gr) := paste0(eval(as.symbol(new_gr)), " - mean")] %>% # add mean to last grouping variable
     .[, lapply(.SD, function(x) round(mean(x[!is.nan(x)], na.rm = T), 2)), by=grp_col, .SDcols=val_col] %>% # compute means per group for each variable
-    .[, group := apply(.[, ..grp_col], 1, paste, collapse=", ")] %>%  # new , combined grouping variable
+    .[, group := apply(.[, grp_col, with = FALSE], 1, paste, collapse=", ")] %>%  # new , combined grouping variable
     .[, c(grp_col) := lapply(grp_col, function(x) NULL)] # removeing separate grouping variables
   data
 }
@@ -50,10 +51,10 @@ get_avg <- function(data, grp_col, val_col){
 #'
 #' @return data.table
 #' @export
-#'agregat
-#' @examples
+# @examples
 get_agr <- function(data, grp_col, val_col, agr_type="mean"){
-  if(arg_type %in% c("mean", "median", "sd")){
+  # agregat <- NULL # no visible binding for global variable 'agregat'
+  if(agr_type %in% c("mean", "median", "sd")){
     stop("Unsuported agregation. Only mean, median and sd available.")
   }
   data.table::setDT(data)
@@ -75,14 +76,14 @@ get_agr <- function(data, grp_col, val_col, agr_type="mean"){
 #' @return data.table
 #' @export
 #'
-#' @examples
+# @examples
 get_rad_dist_matrix <- function(data1, lonlat1, data2=NULL, lonlat2=NULL){
   data.table::setDT(data1)
   data.table::setDT(data2)
   if(is.null(data2)){
-    dist_matrix = geodist::geodist(data1[,..lonlat1], measure="geodesic")
+    dist_matrix = geodist::geodist(data1[, lonlat1, with = FALSE], measure="geodesic")
   } else {
-    dist_matrix = geodist::geodist(data1[,..lonlat1], data2[,..lonlat2], measure="geodesic")
+    dist_matrix = geodist::geodist(data1[, lonlat1, with = FALSE], data2[, lonlat2, with = FALSE], measure="geodesic")
   }
 
   dist_matrix = as.data.frame(dist_matrix)
@@ -103,7 +104,7 @@ get_rad_dist_matrix <- function(data1, lonlat1, data2=NULL, lonlat2=NULL){
 #' @return data.table
 #' @export
 #'
-#' @examples
+# @examples
 count_in_rad <- function(radius, data1, lonlat1, data2=NULL, lonlat2=NULL){
   dist_matrix <- get_rad_dist_matrix(data1, lonlat1, data2, lonlat2)
   res <- rowSums(dist_matrix[, lapply(.SD, function(x) x<radius*1000), .SDcols=names(dist_matrix)])
@@ -124,7 +125,7 @@ count_in_rad <- function(radius, data1, lonlat1, data2=NULL, lonlat2=NULL){
 #' @return data.table
 #' @export
 #'
-#' @examples
+# @examples
 get_n_in_rad <- function(radius, data1, id1, lonlat1, data2=NULL, id2=NULL, lonlat2=NULL){
   dist_matrix <- get_rad_dist_matrix(data1, lonlat1, data2, lonlat2)
   if(is.null(data2)) diag(dist_matrix)=NA
@@ -155,7 +156,7 @@ get_n_in_rad <- function(radius, data1, id1, lonlat1, data2=NULL, id2=NULL, lonl
 #' @return data.table
 #' @export
 #'
-#' @examples
+# @examples
 get_n_closest<- function(n, data1, id1, lonlat1, data2=NULL, id2=NULL, lonlat2=NULL){
   dist_matrix <- get_rad_dist_matrix(data1, lonlat1, data2, lonlat2)
   if(is.null(data2)) diag(dist_matrix)=NA
@@ -166,7 +167,7 @@ get_n_closest<- function(n, data1, id1, lonlat1, data2=NULL, id2=NULL, lonlat2=N
     treshhold <- sort(x)[n]
     within <- which(x <= treshhold)
     temp <- cbind(data2[within,], data.frame(distance=round(x[within]/1000, 2)))
-    data.table::setorder(temp, distance)
+    data.table::setorderv(temp, "distance")
     return(temp)
   })
   names(res) <- data1[[id1]]
@@ -183,7 +184,7 @@ get_n_closest<- function(n, data1, id1, lonlat1, data2=NULL, id2=NULL, lonlat2=N
 #' @return sf object
 #' @export
 #'
-#' @examples
+# @examples
 crop_n_cast <- function(sf_obj, bbox, spat_obj_type=NULL){
   sf_obj <- tryCatch({sf::st_crop(sf_obj, bbox)},
                      warning=function(w){
@@ -213,7 +214,7 @@ crop_n_cast <- function(sf_obj, bbox, spat_obj_type=NULL){
 #' @return sf object
 #' @export
 #'
-#' @examples
+# @examples
 prep_sf <- function(data, lon, lat, crs, bbox=NULL, spat_obj_type=NULL){
   if(inherits(data, "sf")){
     message("Data is already of 'sf' class.")
@@ -242,7 +243,7 @@ prep_sf <- function(data, lon, lat, crs, bbox=NULL, spat_obj_type=NULL){
 #' @return FeatureCollection object
 #' @export
 #'
-#' @examples
+# @examples
 prep_geojson <- function(data, lon, lat, crs, bbox=NULL, spat_obj_type=NULL){
   if(!inherits(data, "sf")){
     coords_sf <- prep_sf(data, lon, lat, crs, bbox, spat_obj_type)
