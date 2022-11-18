@@ -54,7 +54,7 @@ get_avg <- function(data, grp_col, val_col){
 # @examples
 get_agr <- function(data, grp_col, val_col, agr_type="mean"){
   # agregat <- NULL # no visible binding for global variable 'agregat'
-  if(agr_type %in% c("mean", "median", "sd")){
+  if(!agr_type %in% c("mean", "median", "sd")){
     stop("Unsuported agregation. Only mean, median and sd available.")
   }
   data.table::setDT(data)
