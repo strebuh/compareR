@@ -2,9 +2,9 @@
 % Please edit documentation in R/map_hc.R
 \name{draw_hc_full_map}
 \alias{draw_hc_full_map}
-\title{Draw map with points from base map object and points object}
+\title{Draw chart from geofeaturecollection geojsons (map geojson and point geojson(s))}
 \usage{
-draw_hc_full_map(map_obj, points_obj, points_names = NULL)
+draw_hc_full_map(map_obj, points_obj, points_names = NULL, hover_info = NULL)
 }
 \arguments{
 \item{map_obj}{spatial object of class geofeaturecollection for base map (can be obtained with from sf object with prep_geojson)}
@@ -12,6 +12,8 @@ draw_hc_full_map(map_obj, points_obj, points_names = NULL)
 \item{points_obj}{list of spatial object of class geofeaturecollection, or single geofeaturecollection object, these denote points to be placed on the map (can be obtained with from sf object with prep_geojson)}
 
 \item{points_names}{character vector containing names for each series to be drawn}
+
+\item{hover_info}{named list, specify columns to show on tooltip hover, names must be column names, elements either empty string or text to show in front of the value}
 }
 \value{
 object of class "highchart htmlwidget"

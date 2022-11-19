@@ -4,7 +4,7 @@
 \alias{add_hc_mappoins}
 \title{Add points series(es) to highchart htmlwidget base contour map}
 \usage{
-add_hc_mappoins(hc_map, points_obj, points_names = NULL)
+add_hc_mappoins(hc_map, points_obj, points_names = NULL, hover_info = NULL)
 }
 \arguments{
 \item{hc_map}{"highchart htmlwidget" object, a base map (produced with draw_hc_map)}
@@ -12,6 +12,8 @@ add_hc_mappoins(hc_map, points_obj, points_names = NULL)
 \item{points_obj}{list of spatial object of class geofeaturecollection, or single geofeaturecollection object, these denote points to be placed on the map (can be obtained with from sf object with prep_geojson)}
 
 \item{points_names}{character vector containing names for each series to be drawn}
+
+\item{hover_info}{named list, specify columns to show on tooltip hover, names must be column names, elements either empty string or text to show in front of the value}
 }
 \value{
 object of class "highchart htmlwidget"

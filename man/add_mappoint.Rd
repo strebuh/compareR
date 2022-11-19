@@ -4,7 +4,7 @@
 \alias{add_mappoint}
 \title{Adds single mappoint to a higcharter map widglet}
 \usage{
-add_mappoint(hc_map, points_geojson, series_name)
+add_mappoint(hc_map, points_geojson, series_name, hover_info)
 }
 \arguments{
 \item{hc_map}{"highchart htmlwidget" object, a base map (produced with draw_hc_map)}
@@ -12,6 +12,8 @@ add_mappoint(hc_map, points_geojson, series_name)
 \item{points_geojson}{spatial object of class geofeaturecollection (can be obtained with from sf object with prep_geojson)}
 
 \item{series_name}{character of length 1, a name of the series to be drawn}
+
+\item{hover_info}{named list, specify columns to show on tooltip hover, names must be column names, elements either empty string or text to show in front of the value}
 }
 \value{
 highchart htmlwidget

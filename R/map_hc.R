@@ -24,43 +24,50 @@ draw_hc_map <- function(map_obj){
 #' @param hc_map "highchart htmlwidget" object, a base map (produced with draw_hc_map)
 #' @param points_obj list of spatial object of class geofeaturecollection, or single geofeaturecollection object, these denote points to be placed on the map (can be obtained with from sf object with prep_geojson)
 #' @param points_names character vector containing names for each series to be drawn
-#'
+#' @param hover_info named list, specify columns to show on tooltip hover, names must be column names, elements either empty string or text to show in front of the value
 #' @return object of class "highchart htmlwidget"
 #' @export
 #'
 # @examples
-add_hc_mappoins <- function(hc_map, points_obj, points_names=NULL){
+add_hc_mappoins <- function(hc_map, points_obj, points_names=NULL, hover_info=NULL){
 
   points_obj <- verify_points_object(points_obj, points_names)
   for(n in seq_along(points_obj)){
     hc_map <- hc_map %>%
       add_mappoint(points_obj[[n]], points_names[n])
   }
+  if(!is.null(hover_info)){
+    hc_map <- add_custom_hover(hc_map, hover_info)
+  }
   return(hc_map)
 }
 
 
 
-#' Draw map with points from base map object and points object
+#' Draw chart from geofeaturecollection geojsons (map geojson and point geojson(s))
 #' @description Base map must be of geofeaturecollection class, points_obj can be either a single object of a list of objects of geofeaturecollection
 #'
 #' @param map_obj spatial object of class geofeaturecollection for base map (can be obtained with from sf object with prep_geojson)
 #' @param points_obj list of spatial object of class geofeaturecollection, or single geofeaturecollection object, these denote points to be placed on the map (can be obtained with from sf object with prep_geojson)
 #' @param points_names character vector containing names for each series to be drawn
+#' @param hover_info named list, specify columns to show on tooltip hover, names must be column names, elements either empty string or text to show in front of the value
 #'
 #' @return object of class "highchart htmlwidget"
 #' @export
 #'
 # @examples
-draw_hc_full_map <- function(map_obj, points_obj, points_names=NULL){
+draw_hc_full_map <- function(map_obj, points_obj, points_names=NULL, hover_info=NULL){
 
   points_obj <- verify_points_object(points_obj, points_names)
-  map_obj <- draw_hc_map(map_obj)
+  hc_map <- draw_hc_map(map_obj)
   for(n in seq_along(points_obj)){
-    map_obj <- map_obj %>%
-      add_mappoint(points_obj[[n]], points_namesp[n])
+    hc_map <- hc_map %>%
+      add_mappoint(points_obj[[n]], points_names[n])
   }
-  return(map_obj)
+  if(!is.null(hover_info)){
+    hc_map <- add_custom_hover(hc_map, hover_info)
+  }
+  return(hc_map)
 }
 
 
@@ -71,10 +78,11 @@ draw_hc_full_map <- function(map_obj, points_obj, points_names=NULL){
 #' @param hc_map "highchart htmlwidget" object, a base map (produced with draw_hc_map)
 #' @param points_geojson spatial object of class geofeaturecollection (can be obtained with from sf object with prep_geojson)
 #' @param series_name character of length 1, a name of the series to be drawn
+#' @param hover_info named list, specify columns to show on tooltip hover, names must be column names, elements either empty string or text to show in front of the value
 #'
 #' @return highchart htmlwidget
 #'
-add_mappoint <- function(hc_map, points_geojson, series_name){
+add_mappoint <- function(hc_map, points_geojson, series_name, hover_info){
   # browser()
   raise_if_not_geojson(points_geojson)
   hc_map <- hc_map %>%
@@ -82,14 +90,31 @@ add_mappoint <- function(hc_map, points_geojson, series_name){
       type='mappoint',
       dataLabels = list(enabled = FALSE),
       showInLegend = TRUE,
-      data = points_geojson#,
-      # geojson = TRUE
+      data = points_geojson,
+      geojson = TRUE
     )
 
   if(!is.null(series_name)){
     hc_map <- hc_map %>% highcharter::hc_plotOptions(series = list(name = series_name))
   }
+  return(hc_map)
+}
 
+
+#' Transform hover_info list to hc accepter sting and add custom tooltip info
+#'
+#' @param hc_map "highchart htmlwidget" object, a base map (produced with draw_hc_map)
+#' @param hover_info named list, specify columns to show on tooltip hover, names must be column names, elements either empty string or text to show in front of the value
+#'
+#' @return "highchart htmlwidget"
+#'
+add_custom_hover <- function(hc_map, hover_info){
+    hover_info <- paste(purrr::map_chr(seq_along(hover_info),
+                                       ~ ifelse(hover_info[[.x]]!="",
+                                                paste(hover_info[[.x]], paste0("{point.properties.", names(hover_info)[.x], "}"), sep=": "),
+                                                paste(hover_info[[.x]], paste0("{point.properties.", names(hover_info)[.x], "}"), sep=""))),
+                        collapse = " <br> ")
+    hc_map <- hc_map %>% highcharter::hc_plotOptions(series = list(tooltip = list(pointFormat = hover_info)))
   return(hc_map)
 }
 
@@ -125,6 +150,7 @@ verify_points_object <- function(points_obj, points_names){
       stop("One or more elemetns of points is not of class 'geofeaturecollection/geojson'.")
     }
   }
+  # browser()
   if(!is.null(points_names)){
     if(length(points_names)!=length(points_obj)){
       stop("length of points_names and points_obj are different. Expected a name for each element of points_obj.")
