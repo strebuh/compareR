@@ -6,9 +6,9 @@
 #' @param data data.frame or data.table object
 #' @param filters list objects, it's elements are categorical column names, list values are corresponding values; list for restraining data, so plot show only selected records, not all records in dataset
 #' @param id_var character, a column name in data that holds record identifier
-#' @param grouper character, column name that holds categories for grouping data, if NULL no grouping
+#' @param grouper character, column name that holds categories that defines groups by which individual records can be compared, if NULL no grouping
 #' @param mapped_vars character, columns names' which hold measure variables to be displayed on radar
-#' @param agreg_type type of the aggregation do be displayed, one of avaliables in get_agr function (mean, median, sd); if NULL, no aggregation displayed
+#' @param agreg_type type of the aggregation do be displayed, one of available in get_agr function (mean, median, sd); if NULL, no aggregation displayed
 #'
 #' @return plotly object
 #' @export
@@ -28,6 +28,11 @@ draw_radar <- function(data, id_var, grouper, mapped_vars, agreg_type, filters=N
     get_agr(grp_col=grouper, val_col=mapped_vars, agr_type=agreg_type) %>%
     split(., .[, grouper, with = FALSE]) # aggregated by groups and split into subsets, used for plot hovers
   # filtered_grouped_data <- purrr::map(grouped_data, function(df) dplyr::filter(df, dplyr::across(dplyr::all_of(names(filters)), ~ .x %in% filters[[cur_column()]])))
+  if(grouper %in% names(filters)){
+    grouped_data <- grouped_data[filters[[grouper]]]
+    grouped_data_a <- grouped_data_a[filters[[grouper]]]
+  }
+
 
   # Prepare scaled data for drawing radar
   data_s <- scale_data(data, mapped_vars) # scaled data
@@ -36,8 +41,15 @@ draw_radar <- function(data, id_var, grouper, mapped_vars, agreg_type, filters=N
     get_agr(grp_col=grouper, val_col=mapped_vars, agr_type=agreg_type) %>%
     split(., .[, grouper, with = FALSE])
 
+  # Filter only
+  if(grouper %in% names(filters)){
+    grouped_data_s <- grouped_data_s[filters[[grouper]]]
+    grouped_data_s_a <- grouped_data_s_a[filters[[grouper]]]
+  }
+
+  # Apply filters to dataset
   if(!is.null(filters)){
-    grouped_data_s <-  purrr::map(grouped_data_s, function(df) dplyr::filter(df, dplyr::across(dplyr::all_of(names(filters)), ~ .x %in% filters[[cur_column()]])))
+    grouped_data_s <-  purrr::map(grouped_data_s, function(df) dplyr::filter(df, dplyr::across(dplyr::all_of(names(filters)), ~ .x %in% filters[[dplyr::cur_column()]])))
   } else if(n_id_records>5){
     warning(paste0("No filters applied to restrict data, while total number of records is ", n_id_records, ". Without applying filters the plot might be unreadable."))
   }
@@ -56,7 +68,7 @@ draw_radar <- function(data, id_var, grouper, mapped_vars, agreg_type, filters=N
       plotly::add_trace(
         r = unlist(grp_agr[, mapped_vars, with = FALSE]),
         theta = mapped_vars,
-        name = paste(grp_agr[, grouper, with = FALSE], grp_agr$agregat, sep = " - "),
+        name = paste(unlist(grp_agr[, grouper, with = FALSE]), grp_agr$agregat, sep = " - "),
         text = unname(unlist(grp)),
         hoverinfo = 'text'
       )
@@ -73,7 +85,7 @@ draw_radar <- function(data, id_var, grouper, mapped_vars, agreg_type, filters=N
         plotly::add_trace(
           r = unlist(record_s[, mapped_vars, with = FALSE]),
           theta = mapped_vars,
-          name = paste(record_s[, id_var, with = FALSE], record_s[, grouper, with = FALSE], sep=", "),
+          name = paste(unlist(record_s[, id_var, with = FALSE]), unlist(record_s[, grouper, with = FALSE]), sep=", "),
           text = unname(unlist(record)),
           hoverinfo = 'text'
         )
@@ -85,7 +97,7 @@ draw_radar <- function(data, id_var, grouper, mapped_vars, agreg_type, filters=N
       polar = list(
         radialaxis = list(
           visible = F
-          )
+        )
       )
     )
 

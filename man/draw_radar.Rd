@@ -11,11 +11,11 @@ draw_radar(data, id_var, grouper, mapped_vars, agreg_type, filters = NULL)
 
 \item{id_var}{character, a column name in data that holds record identifier}
 
-\item{grouper}{character, column name that holds categories for grouping data, if NULL no grouping}
+\item{grouper}{character, column name that holds categories that defines groups by which individual records can be compared, if NULL no grouping}
 
 \item{mapped_vars}{character, columns names' which hold measure variables to be displayed on radar}
 
-\item{agreg_type}{type of the aggregation do be displayed, one of avaliables in get_agr function (mean, median, sd); if NULL, no aggregation displayed}
+\item{agreg_type}{type of the aggregation do be displayed, one of available in get_agr function (mean, median, sd); if NULL, no aggregation displayed}
 
 \item{filters}{list objects, it's elements are categorical column names, list values are corresponding values; list for restraining data, so plot show only selected records, not all records in dataset}
 }
