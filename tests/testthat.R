@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/reference/test_package.html#special-files
 
 library(testthat)
-library(compareR)
+library(huBvizoRkit)
 
-test_check("compareR")
+test_check("huBvizoRkit")

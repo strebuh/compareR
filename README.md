@@ -1,23 +1,23 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# compareR
+# huBvizoRkit
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/strebuh/compareR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/strebuh/compareR/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/strebuh/huBvizoRkit/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/strebuh/huBvizoRkit/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-The goal of compareR is to …
+The goal of huBvizoRkit is to …
 
 ## Installation
 
-You can install the development version of compareR from
+You can install the development version of huBvizoRkit from
 [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("strebuh/compareR")
+devtools::install_github("strebuh/huBvizoRkit")
 ```
 
 ## Example
@@ -25,7 +25,7 @@ devtools::install_github("strebuh/compareR")
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
-library(compareR)
+library(huBvizoRkit)
 ## basic example code
 ```
 
